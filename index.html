@@ -105,15 +105,37 @@
     document.getElementById('status-text').textContent = 'Lat ' + lat.toFixed(4) + '  Lng ' + lng.toFixed(4);
   }
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
+  // Blue dot marker for current location
+  var blueDot = L.divIcon({
+    html: '<div style="width:18px;height:18px;background:#1a73e8;border-radius:50%;border:3px solid white;box-shadow:0 0 0 4px rgba(26,115,232,0.25)"></div>',
+    iconSize: [18,18], iconAnchor: [9,9], className: ''
+  });
+  var locationMarker = null;
+
+  function startWatching() {
+    if (!navigator.geolocation) {
+      setReady(DEFAULT_LAT, DEFAULT_LNG);
+      document.getElementById('spinner').classList.add('hide');
+      return;
+    }
+
+    // Watch position — updates in real time as customer moves
+    navigator.geolocation.watchPosition(
       function(pos) {
         var lat = pos.coords.latitude;
         var lng = pos.coords.longitude;
-        map.setView([lat, lng], 18);
-        marker.setLatLng([lat, lng]);
-        setReady(lat, lng);
-        document.getElementById('spinner').classList.add('hide');
+
+        // Move blue dot
+        if (locationMarker) {
+          locationMarker.setLatLng([lat, lng]);
+        } else {
+          locationMarker = L.marker([lat, lng], {icon: blueDot, zIndexOffset: -1}).addTo(map);
+          // First time — center map and move green pin to customer
+          map.setView([lat, lng], 18);
+          marker.setLatLng([lat, lng]);
+          setReady(lat, lng);
+          document.getElementById('spinner').classList.add('hide');
+        }
       },
       function() {
         setReady(DEFAULT_LAT, DEFAULT_LNG);
@@ -122,10 +144,9 @@
       },
       {enableHighAccuracy: true, timeout: 15000, maximumAge: 0}
     );
-  } else {
-    setReady(DEFAULT_LAT, DEFAULT_LNG);
-    document.getElementById('spinner').classList.add('hide');
   }
+
+  startWatching();
 
   function confirmLocation() {
     var btn = document.getElementById('confirm-btn');
