@@ -152,13 +152,11 @@
       + '&order='   + encodeURIComponent(ORDER)
       + '&ref='     + encodeURIComponent(REF);
 
-    fetch(url, {mode: 'no-cors'})
-      .then(function() {
-        document.getElementById('done').classList.add('show');
-      })
-      .catch(function() {
-        document.getElementById('done').classList.add('show');
-      });
+    var saveImg = new Image();
+saveImg.src = url;
+setTimeout(function() {
+  document.getElementById('done').classList.add('show');
+}, 800);
   }
 </script>
 </body>
